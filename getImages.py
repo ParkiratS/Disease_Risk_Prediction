@@ -1,6 +1,5 @@
 from opencage.geocoder import OpenCageGeocode
 import requests
-import os
 import math
 import random
 
@@ -23,20 +22,11 @@ def get_topLeft_corner():
     topLeft_lat = city_center_coords[0] + (num_of_images[0]/2)*lat_oneMile_Degree
     topLeft_long = city_center_coords[1] - (num_of_images[1]/2)*long_oneMile_Degree
     return (topLeft_lat, topLeft_long)
-
-def get_bottomRigth_corner():
-    bottomRight_lat = city_center_coords[0] - (num_of_images[0]/2)*lat_oneMile_Degree
-    bottomRight_long = city_center_coords[1] + (num_of_images[1]/2)*long_oneMile_Degree
-    return (bottomRight_lat, bottomRight_long)
-
     
 
 
 topLeft_coords = get_topLeft_corner()
-topRight_coords = get_bottomRigth_corner()
-
 city_grid_coords = []
-#Following Line is used to determine the distance covered by one longitude point at any given latitude.
 
 
 def get_zoom_in_coords():
@@ -63,63 +53,4 @@ def get_sat_pics(zoom):
             print('Getting image: ' + str(index+1) + ',' + str(coord))
             file.write(r.content)
 
-
-get_sat_pics(18)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# api_key = "AIzaSyBwVPcm0csBOu_qgM0P4ruhXihSNojUF8I"
-# zoom = 19
-
-# url = "https://maps.googleapis.com/maps/api/staticmap?"
-  
-# get method of requests module
-# return response object
-  
-# wb mode is stand for write binary mode
-# for i in range(200):
-#    r = requests.get('https://maps.googleapis.com/maps/api/staticmap?center=' +str(center[0]) + ',' + str(center[1]) + '&zoom=' + str(zoom) + '&size=1000x1000&maptype=satellite&format=png8&key='+api_key)
-#    with open('Images/test.png'+str(i), 'wb') as file:
-#       # writing data into the file
-#       print('Getting image: ' + str(i+1))
-#       file.write(r.content)
-#       center = (center[0]+0.1, center[1]+0.1)
+get_sat_pics(19)
