@@ -7,23 +7,26 @@ import imageio
 from io import BytesIO
 import matplotlib.pyplot as plt
 from bruh import complete_Model
-
+from gatherData import WBData
 from tqdm import tqdm
+from csv import writer
 
 def tonp(c): return imageio.imread(BytesIO(c))
 important_info = {'Gmaps_api_key' : "AIzaSyBwVPcm0csBOu_qgM0P4ruhXihSNojUF8I",  'Geocode_api_key':'ccd8c35096e64bff9360bd9ef7a82032', 'GmapsURL' : "https://maps.googleapis.com/maps/api/staticmap?"}
-num_of_images = [20,20]
+num_of_images = [2,2]
 city_name = input('Please type in the city you would like to see: ')
 ims_to_train = []
 ims_to_show = []
-
+csv_list = [0,0,0]
+countryCode = ""
 
 def get_GEO_Location(location):
     geocoder = OpenCageGeocode(important_info['Geocode_api_key'])
     results = geocoder.geocode(location)
-    return (results[0]['geometry']['lat'] , results[0]['geometry']['lng'])
+    countryCode = results[0]['components']['ISO_3166-1_alpha-3']
+    return countryCode,(results[0]['geometry']['lat'] , results[0]['geometry']['lng'])
 
-city_center_coords = get_GEO_Location(city_name)
+countryCode,city_center_coords = get_GEO_Location(city_name)
 lat_oneMile_Degree = (1/69)*0.11
 long_oneMile_Degree = (1/(math.cos(city_center_coords[0]*(math.pi/180))*69.1710411))*0.1
 
@@ -55,7 +58,8 @@ def get_zoom_in_coords():
 
 def get_sat_pics(zoom):
     get_zoom_in_coords()
-    for index, coord in tqdm(enumerate(city_grid_coords)):
+    for index in tqdm(range(len(city_grid_coords))):
+        coord = city_grid_coords[index]
         r = requests.get(important_info['GmapsURL'] + 'center=' +str(coord[0]) + ',' + str(coord[1]) + '&zoom=' + str(zoom) + '&size=1000x1000&maptype=satellite&format=png8&key='+important_info['Gmaps_api_key'])    
         with open('Images/test' +str(index)+ '.png', 'wb') as file:
             ims_to_show[int(index/num_of_images[0])].append(tonp(r.content)[:620])
@@ -69,10 +73,10 @@ def create_Heat_Map():
         HM.append([])
         for j in tqdm(range(len(ims_to_train[i]))):
             IMG = ims_to_train[i,j:j+1,:,:,:3]
-            PRED = model.predict(IMG)
-            INDUSTRIAL = PRED[0,0]*0.515
-            RICH = PRED[0,1]*85
-            SLUMS = PRED[0,2]*0.33
+            PRED = model.predict(IMG, verbose = 0)
+            INDUSTRIAL = PRED[0,0]*0.52
+            RICH = PRED[0,1]*87
+            SLUMS = PRED[0,2]*0.325
             RED = SLUMS
             GREEN = RICH
             BLUE = INDUSTRIAL
@@ -134,14 +138,17 @@ def cleanRGB(arr):
             if (c[0] > c[1]) and (c[0] > c[2]):
                 c[1] = c[1]*0.5
                 c[2] = c[2]*0.5
+                csv_list[0] = csv_list[0]+1
 
             elif (c[1] > c[2]) and (c[1] > c[0]):
                 c[0] = c[0]*0.5
                 c[2] = c[2]*0.5
+                csv_list[1] = csv_list[1]+1
 
             else:
                 c[0] = c[0]*0.5
                 c[1] = c[1]*0.5
+                csv_list[2] = csv_list[2]+1
     
 
 
@@ -149,88 +156,27 @@ def cleanRGB(arr):
 get_sat_pics(19)
 ims_to_show = np.array(ims_to_show)
 im = np.hstack([np.vstack(ims_to_show[:,i]) for i in range(num_of_images[0]-1)])
-plt.imshow(im)
-plt.show()
+
 
 model = complete_Model()
 ims_to_train = np.array(ims_to_train)
 heat_map = create_Heat_Map()
 
-plt.imshow(heat_map, alpha = 0.8)
+csv_list = csv_list + WBData(countryCode)
+csv_list[0] = csv_list[0]/(num_of_images[0]*num_of_images[1])
+csv_list[1] = csv_list[1]/(num_of_images[0]*num_of_images[1])
+csv_list[2] = csv_list[2]/(num_of_images[0]*num_of_images[1])
+
+# with open('dataCollected.csv', 'a') as f_object:
+#     writer_object = writer(f_object)
+#     writer_object.writerow(csv_list)
+#     f_object.close()
+
+
+fig, (ax1, ax2) = plt.subplots(1, 2)
+fig.suptitle(city_name + ' disease index: ')
+ax1.imshow(im)
+ax1.set_title("Picture of City")
+ax2.imshow(heat_map, alpha = 0.8)
+ax2.set_title("Heat Map of City (Red - Poor/High Density, Blue - Heavy Industry, Green - safe)")
 plt.show()
-# a = 0.11
-# b = 0.095
-
-# from tqdm import tqdm
-
-# def cos(deg):
-#   return np.cos(deg*np.pi/180.)
-
-# n = 3
-
-# ims = [[None for i in range(2*n-1)] for j in range(2*n-1)]
-
-# def getimg(coord, zoom, index):
-#   r = requests.get(important_info['GmapsURL'] + 'center=' +str(coord[0]) + ',' + str(coord[1]) + '&zoom=' + str(zoom) + '&size=1000x1000&maptype=satellite&format=png8&key='+important_info['Gmaps_api_key'])    
-#   with open('Images/test'+str(index)+'.png' , 'wb') as file:
-#     print('Getting image' + str(index)+":" + str(coord))
-#     file.write(r.content)
-#     return tonp(r.content)
-
-# def get_sat_pics(zoom=19):
-#     global ims
-#     get_zoom_in_coords()
-#     count = 1
-#     print("Gathering Images")
-#     for idxi in range(-n+1,n):
-#         i = idxi
-#         print(i)
-#         lat = city_center_coords[0]+i*a/69
-#         for idxj in range(-n+1, n):
-#           j = idxj
-#           longt = city_center_coords[1] + j*b/54.6
-          
-#           ims[2*n-2 - (idxi+n-1)][idxj+n-1] = getimg([lat,longt],zoom, count)
-#           count = count+1
-
-# def create_Heat_Map():
-#     HM = [[None for i in range(5)] for j in range(5)]
-#     count = 1
-#     print("Running Images through Model")
-#     for i in range(5):
-#         for j in range(5):
-#             IMG = ims[i,j+1,:,:,:3]
-#             print(count)
-#             PRED = model.predict(IMG, verbose = 0)
-#             INDUSTRIAL = PRED[0,0]
-#             RICH = PRED[0,1]
-#             SLUMS = PRED[0,2]
-#             RED = SLUMS
-#             GREEN = RICH
-#             BLUE = INDUSTRIAL
-
-#             RGB = [RED, GREEN, BLUE]
-#             HM[i][j] = RGB
-#             count = count+1
-
-#     HM = np.array(HM)
-#     return HM
-
-# get_sat_pics()
-# ims = np.array(ims)
-# im = np.hstack([np.vstack(ims[:,i]) for i in range(2*n-1)])
-# model = complete_Model()
-# heat_Map = create_Heat_Map()
-
-# plt.imshow(im)
-# plt.show()
-# plt.imshow(heat_Map)
-# plt.show()
-
-# fig, ax = plt.subplots()
-
-# ax.imshow(im)
-# ax.imshow(heat_Map, alpha = 0.5)
-# plt.show()
-
-#get_sat_pics(19)
