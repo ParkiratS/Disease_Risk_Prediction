@@ -13,7 +13,7 @@ from csv import writer
 
 def tonp(c): return imageio.imread(BytesIO(c))
 important_info = {'Gmaps_api_key' : "AIzaSyBwVPcm0csBOu_qgM0P4ruhXihSNojUF8I",  'Geocode_api_key':'ccd8c35096e64bff9360bd9ef7a82032', 'GmapsURL' : "https://maps.googleapis.com/maps/api/staticmap?"}
-num_of_images = [20,20]
+num_of_images = [8,8]
 city_name = input('Please type in the city you would like to see: ')
 ims_to_train = []
 ims_to_show = []
@@ -28,7 +28,7 @@ def get_GEO_Location(location):
 
 countryCode,city_center_coords = get_GEO_Location(city_name)
 lat_oneMile_Degree = (1/69)*0.11
-long_oneMile_Degree = (1/(math.cos(city_center_coords[0]*(math.pi/180))*69.1710411))*0.1
+long_oneMile_Degree = (1/(math.cos(city_center_coords[0]*(math.pi/180))*69.1710411))*0.115
 
 def get_topLeft_corner():
     topLeft_lat = city_center_coords[0] + (num_of_images[0]/2)*lat_oneMile_Degree
