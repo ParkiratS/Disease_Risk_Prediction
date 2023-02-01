@@ -13,7 +13,7 @@ from csv import writer
 
 def tonp(c): return imageio.imread(BytesIO(c))
 important_info = {'Gmaps_api_key' : "AIzaSyBwVPcm0csBOu_qgM0P4ruhXihSNojUF8I",  'Geocode_api_key':'ccd8c35096e64bff9360bd9ef7a82032', 'GmapsURL' : "https://maps.googleapis.com/maps/api/staticmap?"}
-num_of_images = [2,2]
+num_of_images = [20,20]
 city_name = input('Please type in the city you would like to see: ')
 ims_to_train = []
 ims_to_show = []
@@ -74,9 +74,9 @@ def create_Heat_Map():
         for j in tqdm(range(len(ims_to_train[i]))):
             IMG = ims_to_train[i,j:j+1,:,:,:3]
             PRED = model.predict(IMG, verbose = 0)
-            INDUSTRIAL = PRED[0,0]*0.52
+            INDUSTRIAL = PRED[0,0]*0.5
             RICH = PRED[0,1]*87
-            SLUMS = PRED[0,2]*0.325
+            SLUMS = PRED[0,2]*0.33
             RED = SLUMS
             GREEN = RICH
             BLUE = INDUSTRIAL
@@ -178,5 +178,5 @@ fig.suptitle(city_name + ' disease index: ')
 ax1.imshow(im)
 ax1.set_title("Picture of City")
 ax2.imshow(heat_map, alpha = 0.8)
-ax2.set_title("Heat Map of City (Red - Poor/High Density, Blue - Heavy Industry, Green - safe)")
+ax2.set_title("Heat Map")
 plt.show()
