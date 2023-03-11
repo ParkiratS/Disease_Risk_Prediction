@@ -12,7 +12,7 @@ from tqdm import tqdm
 from csv import writer
 
 def tonp(c): return imageio.imread(BytesIO(c))
-important_info = {'Gmaps_api_key' : "AIzaSyBwVPcm0csBOu_qgM0P4ruhXihSNojUF8I",  'Geocode_api_key':'ccd8c35096e64bff9360bd9ef7a82032', 'GmapsURL' : "https://maps.googleapis.com/maps/api/staticmap?"}
+important_info = {'Gmaps_api_key' : "AIzaSyBwVPcm0csBOu_qgM0P4ruhXihSNojUF8I",  'Geocode_api_key':'ccd8c35096e64bff9360bd9ef7a82032', 'GmapsURL' : ""}
 num_of_images = [8,8]
 city_name = input('Please type in the city you would like to see: ')
 ims_to_train = []
